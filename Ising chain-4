@@ -1,0 +1,85 @@
+clc
+clear
+m=4;
+n=2^m;
+X=[0,1;1,0]; Y=[0,-1i;1i,0]; Z=[1,0;0,-1];
+I=eye(2);
+II=eye(n);
+g=2.5;
+H=-kron(kron(kron(Z,Z),I),I)-kron(kron(kron(I,Z),Z),I)-kron(kron(kron(I,I),Z),Z)-g*kron(kron(kron(X,I),I),I)-g*kron(kron(kron(I,X),I),I)...
+    -g*kron(kron(kron(I,I),X),I)-g*kron(kron(kron(I,I),I),X);
+[V,E]=eig(H);
+Is=ones(n,1)*sqrt(16)/16;
+delta11=0.02*pi; Itheta11=1.02*pi; Ftheta11=1.1*pi; theta11=Itheta11:delta11:Ftheta11;
+delta12=0.02*pi; Itheta12=1.02*pi; Ftheta12=1.1*pi; theta12=Itheta12:delta12:Ftheta12;
+delta21=0.02*pi; Itheta21=1.57*pi; Ftheta21=1.67*pi; theta21=Itheta21:delta21:Ftheta21;
+delta22=0.02*pi; Itheta22=1.57*pi; Ftheta22=1.67*pi; theta22=Itheta22:delta22:Ftheta22;
+delta31=0.02*pi; Itheta31=1.02*pi; Ftheta31=1.1*pi; theta31=Itheta31:delta31:Ftheta31;
+delta32=0.02*pi; Itheta32=1.02*pi; Ftheta32=1.1*pi; theta32=Itheta32:delta32:Ftheta32;
+delta41=0.02*pi; Itheta41=1.57*pi; Ftheta41=1.67*pi; theta41=Itheta41:delta41:Ftheta41;
+delta42=0.02*pi; Itheta42=1.57*pi; Ftheta42=1.67*pi; theta42=Itheta42:delta42:Ftheta42;
+num11=size(theta11);num12=size(theta12);num21=size(theta21);num22=size(theta22);
+num31=size(theta31);num32=size(theta32);num41=size(theta41);num42=size(theta42);
+F=zeros(1,num11(1,2)*num12(1,2)*num21(1,2)*num22(1,2)*num31(1,2)*num32(1,2)*num41(1,2)*num42(1,2));
+for ii=1:num11(1,2)
+    for ll=1:num12(1,2)
+        for jj=1:num21(1,2)
+            for kk=1:num22(1,2)
+                for ii2=1:num31(1,2)
+                    for ll2=1:num32(1,2)
+                        for jj2=1:num41(1,2)
+                            for kk2=1:num42(1,2)      
+        G11=expm(-1i*kron(kron(kron(Z,Z),I),I)*theta11(ii));
+        G12=expm(-1i*kron(kron(kron(I,Z),Z),I)*theta12(ll));
+        G13=expm(-1i*kron(kron(kron(I,I),Z),Z)*theta11(ii));
+        U11=expm(-1i*kron(kron(kron(X,I),I),I)*theta21(jj));
+        U12=expm(-1i*kron(kron(kron(I,X),I),I)*theta22(kk));
+        U13=expm(-1i*kron(kron(kron(I,I),X),I)*theta22(kk));
+        U14=expm(-1i*kron(kron(kron(I,I),I),X)*theta21(jj));
+        G21=expm(-1i*kron(kron(kron(Z,Z),I),I)*theta31(ii2));
+        G22=expm(-1i*kron(kron(kron(I,Z),Z),I)*theta32(ll2));
+        G23=expm(-1i*kron(kron(kron(I,I),Z),Z)*theta31(ii2));
+        U21=expm(-1i*kron(kron(kron(X,I),I),I)*theta41(jj2));
+        U22=expm(-1i*kron(kron(kron(I,X),I),I)*theta42(kk2));
+        U23=expm(-1i*kron(kron(kron(I,I),X),I)*theta42(kk2));
+        U24=expm(-1i*kron(kron(kron(I,I),I),X)*theta41(jj2));
+        Fs=U24*U23*U22*U21*G23*G22*G21*U14*U13*U12*U11*G13*G12*G11*Is;        
+        F((ii-1)*num12(1,2)*num21(1,2)*num22(1,2)*num31(1,2)*num32(1,2)*num41(1,2)*num42(1,2)+(ll-1)*num21(1,2)*num22(1,2)*num31(1,2)*num32(1,2)...
+            *num41(1,2)*num42(1,2)+(jj-1)*num22(1,2)*num31(1,2)*num32(1,2)*num41(1,2)*num42(1,2)+(kk-1)*num31(1,2)*num32(1,2)*num41(1,2)...
+            *num42(1,2)+(ii2-1)*num32(1,2)*num41(1,2)*num42(1,2)+(ll2-1)*num41(1,2)*num42(1,2)+(jj2-1)*num42(1,2)+kk2)=(abs(V(:,1)'*Fs))^2;
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
+plot(F)
+axis([1,6^8,0.6,1]);
+xlabel('\theta_{11},\theta_{12},\theta_{21},\theta_{22},\theta_{31},\theta_{32},\theta_{41},\theta_{42}','FontSize',18);
+ylabel('F','FontSize',18);
+set(gca,'XTick',1:(6^8-1)/2:6^8,'xticklabel',{'(1.3\pi,1.15\pi,0.9\pi,\newline1.3\pi,1.15\pi,0.9\pi)',...
+    '(1.35\pi,2\pi,...0.95\pi,\newline 1.30\pi,1.20\pi,\pi)','(1.4\pi,1.25\pi,\pi,\newline 1.4\pi,1.25\pi,\pi)'},'FontSize',17);
+[MF,index]=max(F);
+Mtheta11=(Itheta11+floor(index/num12(1,2)/num21(1,2)/num22(1,2)/num31(1,2)/num32(1,2)/num41(1,2)/num42(1,2))*delta11)/pi
+Mtheta12=(Itheta12+floor(mod(index,num12(1,2)*num21(1,2)*num22(1,2)*num31(1,2)*num32(1,2)*num41(1,2)*num42(1,2))/num21(1,2)/num22(1,2)...
+    /num31(1,2)/num32(1,2)/num41(1,2)/num42(1,2))*delta12)/pi
+Mtheta21=(Itheta21+floor(mod(mod(index,num12(1,2)*num21(1,2)*num22(1,2)*num31(1,2)*num32(1,2)*num41(1,2)*num42(1,2)),num21(1,2)*num22(1,2)...
+    *num31(1,2)*num32(1,2)*num41(1,2)*num42(1,2))/num22(1,2)/num31(1,2)/num32(1,2)/num41(1,2)/num42(1,2))*delta21)/pi
+Mtheta22=(Itheta22+floor(mod(mod(mod(index,num12(1,2)*num21(1,2)*num22(1,2)*num31(1,2)*num32(1,2)*num41(1,2)*num42(1,2)),num21(1,2)*num22(1,2)...
+    *num31(1,2)*num32(1,2)*num41(1,2)*num42(1,2)),num22(1,2)*num31(1,2)*num32(1,2)*num41(1,2)*num42(1,2))/num31(1,2)/num32(1,2)/num41(1,2)...
+    /num42(1,2))*delta22)/pi
+Mtheta31=(Itheta31+floor(mod(mod(mod(mod(index,num12(1,2)*num21(1,2)*num22(1,2)*num31(1,2)*num32(1,2)*num41(1,2)*num42(1,2)),num21(1,2)...
+    *num22(1,2)*num31(1,2)*num32(1,2)*num41(1,2)*num42(1,2)),num22(1,2)*num31(1,2)*num32(1,2)*num41(1,2)*num42(1,2)),num31(1,2)*num32(1,2)...
+    *num41(1,2)*num42(1,2))/num32(1,2)/num41(1,2)/num42(1,2))*delta31)/pi
+Mtheta32=(Itheta32+floor(mod(mod(mod(mod(mod(index,num12(1,2)*num21(1,2)*num22(1,2)*num31(1,2)*num32(1,2)*num41(1,2)*num42(1,2)),num21(1,2)...
+    *num22(1,2)*num31(1,2)*num32(1,2)*num41(1,2)*num42(1,2)),num22(1,2)*num31(1,2)*num32(1,2)*num41(1,2)*num42(1,2)),num31(1,2)*num32(1,2)...
+    *num41(1,2)*num42(1,2)),num32(1,2)*num41(1,2)*num42(1,2))/num41(1,2)/num42(1,2))*delta32)/pi
+Mtheta41=(Itheta41+floor(mod(mod(mod(mod(mod(mod(index,num12(1,2)*num21(1,2)*num22(1,2)*num31(1,2)*num32(1,2)*num41(1,2)*num42(1,2)),num21(1,2)...
+    *num22(1,2)*num31(1,2)*num32(1,2)*num41(1,2)*num42(1,2)),num22(1,2)*num31(1,2)*num32(1,2)*num41(1,2)*num42(1,2)),num31(1,2)*num32(1,2)...
+    *num41(1,2)*num42(1,2)),num32(1,2)*num41(1,2)*num42(1,2)),num41(1,2)*num42(1,2))/num42(1,2))*delta41)/pi
+Mtheta42=(Itheta42+(mod(mod(mod(mod(mod(mod(mod(index,num12(1,2)*num21(1,2)*num22(1,2)*num31(1,2)*num32(1,2)*num41(1,2)*num42(1,2)),num21(1,2)...
+    *num22(1,2)*num31(1,2)*num32(1,2)*num41(1,2)*num42(1,2)),num22(1,2)*num31(1,2)*num32(1,2)*num41(1,2)*num42(1,2)),num31(1,2)*num32(1,2)...
+    *num41(1,2)*num42(1,2)),num32(1,2)*num41(1,2)*num42(1,2)),num41(1,2)*num42(1,2)),num42(1,2))-1)*delta42)/pi
+MF
