@@ -1,0 +1,47 @@
+clc
+clear
+m=3;
+n=2^m;
+X=[0,1;1,0]; Y=[0,-1i;1i,0]; Z=[1,0;0,-1];
+I=eye(2);
+II=eye(n);
+g=1;
+H=-kron(kron(Z,Z),I)-kron(kron(I,Z),Z)-g*kron(kron(X,I),I)-g*kron(kron(I,X),I)-g*kron(kron(I,I),X);
+[V,E]=eig(H);
+Is=ones(n,1)*sqrt(8)/8;
+delta1=0.01*pi; Itheta1=0; Ftheta1=2*pi; theta1=Itheta1:delta1:Ftheta1;
+delta2=0.01*pi; Itheta2=0; Ftheta2=2*pi; theta2=Itheta2:delta2:Ftheta2;
+num1=size(theta1);
+num2=size(theta2);
+F=zeros(1,num1(1,2)*num2(1,2));
+for ii=1:num1(1,2)
+    for jj=1:num2(1,2)
+        G11=expm(-1i*kron(kron(Z,Z),I)*theta1(ii));
+        G12=expm(-1i*kron(kron(I,Z),Z)*theta1(ii));
+        U11=expm(-1i*kron(kron(X,I),I)*theta2(jj));
+        U12=expm(-1i*kron(kron(I,X),I)*theta2(jj));
+        U13=expm(-1i*kron(kron(I,I),X)*theta2(jj));
+        G21=expm(-1i*kron(kron(Z,Z),I)*theta1(ii));
+        G22=expm(-1i*kron(kron(I,Z),Z)*theta1(ii));
+        U21=expm(-1i*kron(kron(X,I),I)*theta2(jj));
+        U22=expm(-1i*kron(kron(I,X),I)*theta2(jj));
+        U23=expm(-1i*kron(kron(I,I),X)*theta2(jj));
+        Fs=U23*U22*U21*G22*G21*U13*U12*U11*G12*G11*Is;
+        F((ii-1)*num2(1,2)+jj)=(abs(V(:,1)'*Fs))^2;
+    end
+end
+plot(F)
+axis([1,40401,0,1]);
+xlabel('\theta_1,\theta_2','FontSize',18);
+ylabel('F','FontSize',14);
+set(gca,'XTick',1:10050:40401,'xticklabel',{'(0,0)','(0.5\pi,0)','(\pi,0)','(1.5\pi,0)','(2\pi,0)'},'FontSize',18);
+hold on
+axes('position',[0.24,0.78,0.6,0.1]);%生成局部放大图
+plot(F,'color','black')
+xlim([1,201]); axis([1,201,0.8,1]);
+xlabel('\theta_1,\theta_2','FontSize',8);
+set(gca,'XTick',1:50:201,'xticklabel',{'(0,0)','(0,0.5\pi)','(0,\pi)','(0,1.5\pi)','(0,2\pi)'},'FontSize',14);%以上为局部放大图部分
+[MF,index]=max(F);
+Mtheta1=(Itheta1+floor(index/num2(1,2))*delta1)/pi
+Mtheta2=(Itheta2+(mod(index,num2(1,2))-1)*delta2)/pi
+MF
