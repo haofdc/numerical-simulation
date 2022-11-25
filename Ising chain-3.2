@@ -1,0 +1,47 @@
+clc
+clear
+m=3;
+n=2^m;
+X=[0,1;1,0]; Y=[0,-1i;1i,0]; Z=[1,0;0,-1];
+I=eye(2);
+II=eye(n);
+g=1;
+H=-kron(kron(Z,Z),I)-kron(kron(I,Z),Z)-g*kron(kron(X,I),I)-g*kron(kron(I,X),I)-g*kron(kron(I,I),X);
+[V,E]=eig(H);
+Is=ones(n,1)*sqrt(8)/8;
+delta1=0.01*pi; Itheta1=0*pi; Ftheta1=0.3*pi; theta1=Itheta1:delta1:Ftheta1;
+delta21=0.01*pi; Itheta21=0.4*pi; Ftheta21=0.7*pi; theta21=Itheta21:delta21:Ftheta21;
+delta22=0.01*pi; Itheta22=0.4*pi; Ftheta22=0.7*pi; theta22=Itheta22:delta22:Ftheta22;
+num1=size(theta1);
+num21=size(theta21);
+num22=size(theta22);
+F=zeros(1,num1(1,2)*num21(1,2)*num22(1,2));
+for ii=1:num1(1,2)
+    for jj=1:num21(1,2)
+        for kk=1:num22(1,2)
+        G11=expm(-1i*kron(kron(Z,Z),I)*theta1(ii));
+        G12=expm(-1i*kron(kron(I,Z),Z)*theta1(ii));
+        U11=expm(-1i*kron(kron(X,I),I)*theta21(jj));
+        U12=expm(-1i*kron(kron(I,X),I)*theta22(kk));
+        U13=expm(-1i*kron(kron(I,I),X)*theta21(jj));
+        G21=expm(-1i*kron(kron(Z,Z),I)*theta1(ii));
+        G22=expm(-1i*kron(kron(I,Z),Z)*theta1(ii));
+        U21=expm(-1i*kron(kron(X,I),I)*theta21(jj));
+        U22=expm(-1i*kron(kron(I,X),I)*theta22(kk));
+        U23=expm(-1i*kron(kron(I,I),X)*theta21(jj));
+        Fs=U23*U22*U21*G22*G21*U13*U12*U11*G12*G11*Is;
+      F((ii-1)*num21(1,2)*num22(1,2)+(jj-1)*num22(1,2)+kk)=(abs(V(:,1)'*Fs))^2;
+        end
+    end
+end
+plot(F)
+axis([1,29791,0,1]);
+xlabel('\theta_1,\theta_{21},\theta_{22}','FontSize',18);
+ylabel('F','FontSize',18);
+set(gca,'XTick',1:14415:29791,'xticklabel',{'(0,0.4\pi,0.4\pi)','(0.15\pi,0.4\pi,0.4\pi)','(0.3\pi,0.4\pi,0.4\pi)'},...
+'FontSize',17);
+[MF,index]=max(F);
+Mtheta1=(Itheta1+floor(index/num21(1,2)/num22(1,2))*delta1)/pi
+Mtheta21=(Itheta21+floor(mod(index,num21(1,2)*num22(1,2))/num22(1,2))*delta21)/pi
+Mtheta22=(Itheta22+floor(mod(mod(index,num21(1,2)*num22(1,2)),num22(1,2))-1)*delta22)/pi
+MF
